@@ -1,98 +1,152 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend API - Web Thuê Đồ Cosplay
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend được xây dựng bằng NestJS với TypeORM, PostgreSQL (Neon), và JWT authentication.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Cấu trúc dự án
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+src/
+├── entities/          # Database entities
+│   ├── user.entity.ts
+│   ├── category.entity.ts
+│   ├── product.entity.ts
+│   ├── order.entity.ts
+│   └── order-item.entity.ts
+├── auth/              # Authentication module
+│   ├── dto/
+│   ├── guards/
+│   ├── strategies/
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   └── auth.module.ts
+├── users/             # Users module
+├── categories/        # Categories module
+├── products/          # Products module
+├── orders/            # Orders module
+├── common/            # Common utilities
+│   ├── dto/
+│   └── decorators/
+└── config/            # Configuration files
 ```
 
-## Compile and run the project
+## Cài đặt
 
+1. Cài đặt dependencies:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
-
+2. Tạo file `.env` từ `.env.example`:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+3. Cấu hình database trong file `.env`:
+```
+DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
+JWT_SECRET=your-secret-key-change-in-production
+JWT_EXPIRES_IN=7d
+PORT=3000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+4. Chạy ứng dụng:
+```bash
+# Development
+npm run start:dev
 
-## Resources
+# Production
+npm run build
+npm run start:prod
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## API Documentation
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Sau khi chạy server, truy cập Swagger UI tại:
+```
+http://localhost:3000/api
+```
 
-## Support
+## Các tính năng chính
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 1. Authentication (Auth)
+- Đăng ký tài khoản (`POST /auth/register`)
+- Đăng nhập (`POST /auth/login`)
+- JWT token authentication
 
-## Stay in touch
+### 2. Users
+- Quản lý người dùng (Admin only)
+- Xem và cập nhật profile
+- Phân quyền: Admin và User
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### 3. Categories
+- CRUD danh mục sản phẩm
+- Public: Xem danh sách
+- Admin: Tạo, cập nhật, xóa
 
-## License
+### 4. Products
+- CRUD sản phẩm
+- Tìm kiếm và lọc theo danh mục
+- Phân trang
+- Quản lý số lượng và trạng thái
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 5. Orders
+- Tạo đơn hàng
+- Quản lý trạng thái đơn hàng (pending, confirmed, rented, returned, cancelled)
+- Tính toán giá và tiền cọc tự động
+- Quản lý số lượng sản phẩm khi đặt hàng
+
+## Database Schema
+
+### User
+- id, email, password, fullName, phone, address
+- role (admin/user), isActive
+
+### Category
+- id, name, description, image, isActive
+
+### Product
+- id, name, description, images, price, deposit
+- quantity, size, color, brand
+- isAvailable, isActive
+- categoryId (foreign key)
+
+### Order
+- id, orderNumber, status
+- totalPrice, totalDeposit
+- rentalStartDate, rentalEndDate
+- rentalAddress, notes
+- userId (foreign key)
+
+### OrderItem
+- id, quantity, price, deposit
+- orderId, productId (foreign keys)
+
+## Security
+
+- Password được hash bằng bcrypt
+- JWT authentication với Bearer token
+- Role-based access control (RBAC)
+- Input validation với class-validator
+- CORS enabled
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| DATABASE_URL | PostgreSQL connection string | - |
+| JWT_SECRET | Secret key for JWT | - |
+| JWT_EXPIRES_IN | JWT expiration time | 7d |
+| PORT | Server port | 3000 |
+| NODE_ENV | Environment | development |
+| FRONTEND_URL | Frontend URL for CORS | http://localhost:3000 |
+
+## Scripts
+
+- `npm run start` - Start server
+- `npm run start:dev` - Start in development mode with watch
+- `npm run start:prod` - Start in production mode
+- `npm run build` - Build for production
+- `npm run test` - Run tests
+- `npm run lint` - Run linter

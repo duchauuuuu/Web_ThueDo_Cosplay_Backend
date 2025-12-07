@@ -1,8 +1,56 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
+  // Increase payload size for file uploads
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
+
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+  });
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('API Thuê Đồ Cosplay')
+    .setDescription('API cho hệ thống thuê đồ cosplay')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('Auth', 'Xác thực người dùng')
+    .addTag('Users', 'Quản lý người dùng')
+    .addTag('Categories', 'Quản lý danh mục')
+    .addTag('Products', 'Quản lý sản phẩm')
+    .addTag('Orders', 'Quản lý đơn hàng')
+    .addTag('Comments', 'Bình luận và đánh giá')
+    .addTag('Payments', 'Thanh toán')
+    .addTag('Upload', 'Upload ảnh')
+    .addTag('Favorites', 'Danh sách yêu thích')
+    .addTag('Addresses', 'Quản lý địa chỉ')
+    .addTag('Product Images', 'Quản lý ảnh sản phẩm')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Swagger documentation: http://localhost:${port}/api`);
 }
 bootstrap();
