@@ -11,6 +11,7 @@ import {
 import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { Payment } from './payment.entity';
+import { Comment } from './comment.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -67,6 +68,9 @@ export class Order {
 
   @OneToMany(() => Payment, (payment) => payment.order)
   payments: Payment[];
+
+  @OneToMany(() => Comment, (comment) => comment.order)
+  comments: Comment[];
 
   @CreateDateColumn()
   createdAt: Date;

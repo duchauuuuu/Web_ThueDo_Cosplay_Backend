@@ -6,11 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Product } from './product.entity';
+import { Order } from './order.entity';
 
 @Entity('comments')
+@Unique(['orderId']) // Mỗi order chỉ có thể comment 1 lần
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -34,6 +37,13 @@ export class Comment {
 
   @Column()
   productId: string;
+
+  @ManyToOne(() => Order, (order) => order.comments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
+
+  @Column()
+  orderId: string;
 
   @Column({ default: true })
   isActive: boolean;

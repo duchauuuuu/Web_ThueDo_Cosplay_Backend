@@ -43,12 +43,13 @@ async function bootstrap() {
     .addTag('Favorites', 'Danh sách yêu thích')
     .addTag('Addresses', 'Quản lý địa chỉ')
     .addTag('Product Images', 'Quản lý ảnh sản phẩm')
+    .addTag('Seed', 'Seed dữ liệu mẫu')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8081;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api`);

@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from '../entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ProductsService } from '../products/products.service';
+import { OrdersService } from '../orders/orders.service';
+import { OrderStatus } from '../entities/order.entity';
 
 @Injectable()
 export class CommentsService {
@@ -12,11 +19,53 @@ export class CommentsService {
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
     private productsService: ProductsService,
+    private ordersService: OrdersService,
   ) {}
 
   async create(userId: string, createCommentDto: CreateCommentDto): Promise<Comment> {
     // Kiểm tra sản phẩm tồn tại
     await this.productsService.findOne(createCommentDto.productId);
+
+    // Kiểm tra đơn hàng tồn tại và thuộc về user
+    const order = await this.ordersService.findOne(createCommentDto.orderId);
+
+    if (order.userId !== userId) {
+      throw new ForbiddenException(
+        'Bạn không có quyền comment đơn hàng này',
+      );
+    }
+
+    // Kiểm tra đơn hàng đã được xác nhận (đã mua xong)
+    const allowedStatuses = [
+      OrderStatus.CONFIRMED,
+      OrderStatus.RENTED,
+      OrderStatus.RETURNED,
+    ];
+    if (!allowedStatuses.includes(order.status)) {
+      throw new BadRequestException(
+        'Chỉ có thể comment sau khi đơn hàng đã được xác nhận',
+      );
+    }
+
+    // Kiểm tra đơn hàng có chứa sản phẩm này không
+    const hasProduct = order.orderItems.some(
+      (item) => item.productId === createCommentDto.productId,
+    );
+    if (!hasProduct) {
+      throw new BadRequestException(
+        'Sản phẩm này không có trong đơn hàng',
+      );
+    }
+
+    // Kiểm tra đơn hàng đã có comment chưa (mỗi order chỉ comment 1 lần)
+    const existingComment = await this.commentsRepository.findOne({
+      where: { orderId: createCommentDto.orderId },
+    });
+    if (existingComment) {
+      throw new BadRequestException(
+        'Đơn hàng này đã được đánh giá. Mỗi đơn hàng chỉ có thể comment 1 lần',
+      );
+    }
 
     const comment = this.commentsRepository.create({
       ...createCommentDto,
@@ -29,7 +78,7 @@ export class CommentsService {
   async findByProduct(productId: string): Promise<Comment[]> {
     return this.commentsRepository.find({
       where: { productId, isActive: true },
-      relations: ['user'],
+      relations: ['user', 'order'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -37,7 +86,7 @@ export class CommentsService {
   async findOne(id: string): Promise<Comment> {
     const comment = await this.commentsRepository.findOne({
       where: { id },
-      relations: ['user', 'product'],
+      relations: ['user', 'product', 'order'],
     });
     if (!comment) {
       throw new NotFoundException(`Không tìm thấy bình luận với ID: ${id}`);

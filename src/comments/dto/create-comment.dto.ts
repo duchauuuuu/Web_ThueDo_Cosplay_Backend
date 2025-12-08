@@ -1,4 +1,4 @@
-import { IsString, IsNumber, Min, Max, IsOptional } from 'class-validator';
+import { IsString, IsNumber, Min, Max } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDto {
@@ -15,5 +15,9 @@ export class CreateCommentDto {
   @ApiProperty()
   @IsString()
   productId: string;
+
+  @ApiProperty({ description: 'ID của đơn hàng đã mua' })
+  @IsString()
+  orderId: string;
 }
 

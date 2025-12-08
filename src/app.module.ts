@@ -15,6 +15,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { ProductImagesModule } from './product-images/product-images.module';
+import { SeedModule } from './seed/seed.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -40,6 +41,7 @@ import { getDatabaseConfig } from './config/database.config';
     FavoritesModule,
     AddressesModule,
     ProductImagesModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
