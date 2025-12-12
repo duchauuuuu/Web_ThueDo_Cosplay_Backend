@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Order } from './order.entity';
+import { Invoice } from './invoice.entity';
 
 export enum PaymentMethod {
   SEPAY = 'sepay',
@@ -62,10 +64,12 @@ export class Payment {
   @Column()
   orderId: string;
 
+  @OneToMany(() => Invoice, (invoice) => invoice.payment)
+  invoices: Invoice[];
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

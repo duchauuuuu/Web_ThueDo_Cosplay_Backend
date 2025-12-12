@@ -44,6 +44,7 @@ async function bootstrap() {
     .addTag('Addresses', 'Quản lý địa chỉ')
     .addTag('Product Images', 'Quản lý ảnh sản phẩm')
     .addTag('Seed', 'Seed dữ liệu mẫu')
+    .addTag('Invoices', 'Quản lý hóa đơn')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
