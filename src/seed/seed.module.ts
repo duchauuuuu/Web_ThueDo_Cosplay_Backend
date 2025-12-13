@@ -12,6 +12,7 @@ import { OrderItem } from '../entities/order-item.entity';
 import { Payment } from '../entities/payment.entity';
 import { Comment } from '../entities/comment.entity';
 import { Favorite } from '../entities/favorite.entity';
+import { Voucher } from '../entities/voucher.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Favorite } from '../entities/favorite.entity';
       Payment,
       Comment,
       Favorite,
+      Voucher,
     ]),
   ],
   controllers: [SeedController],

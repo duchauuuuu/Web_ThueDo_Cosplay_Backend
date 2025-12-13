@@ -22,7 +22,10 @@ export class CommentsService {
     private ordersService: OrdersService,
   ) {}
 
-  async create(userId: string, createCommentDto: CreateCommentDto): Promise<Comment> {
+  async create(
+    userId: string,
+    createCommentDto: CreateCommentDto,
+  ): Promise<Comment> {
     // Kiểm tra sản phẩm tồn tại
     await this.productsService.findOne(createCommentDto.productId);
 
@@ -30,9 +33,7 @@ export class CommentsService {
     const order = await this.ordersService.findOne(createCommentDto.orderId);
 
     if (order.userId !== userId) {
-      throw new ForbiddenException(
-        'Bạn không có quyền comment đơn hàng này',
-      );
+      throw new ForbiddenException('Bạn không có quyền comment đơn hàng này');
     }
 
     // Kiểm tra đơn hàng đã được xác nhận (đã mua xong)
@@ -52,9 +53,7 @@ export class CommentsService {
       (item) => item.productId === createCommentDto.productId,
     );
     if (!hasProduct) {
-      throw new BadRequestException(
-        'Sản phẩm này không có trong đơn hàng',
-      );
+      throw new BadRequestException('Sản phẩm này không có trong đơn hàng');
     }
 
     // Kiểm tra đơn hàng đã có comment chưa (mỗi order chỉ comment 1 lần)
@@ -75,12 +74,47 @@ export class CommentsService {
     return this.commentsRepository.save(comment);
   }
 
-  async findByProduct(productId: string): Promise<Comment[]> {
-    return this.commentsRepository.find({
+  async findByProduct(
+    productId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    data: any[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await this.commentsRepository.findAndCount({
       where: { productId, isActive: true },
       relations: ['user', 'order'],
       order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    // Transform data để thêm userName
+    const data = comments.map((comment) => ({
+      id: comment.id,
+      userId: comment.userId,
+      userName: comment.user?.fullName || 'Người dùng ẩn danh',
+      productId: comment.productId,
+      orderId: comment.orderId,
+      rating: comment.rating,
+      content: comment.content,
+      imageUrl: comment.imageUrl,
+      isActive: comment.isActive,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    }));
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: string): Promise<Comment> {
@@ -94,7 +128,11 @@ export class CommentsService {
     return comment;
   }
 
-  async update(id: string, userId: string, updateCommentDto: UpdateCommentDto): Promise<Comment> {
+  async update(
+    id: string,
+    userId: string,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<Comment> {
     const comment = await this.findOne(id);
 
     // Chỉ cho phép user sở hữu comment hoặc admin mới được sửa
@@ -118,14 +156,14 @@ export class CommentsService {
   }
 
   async getAverageRating(productId: string): Promise<number> {
-    const result = await this.commentsRepository
-      .createQueryBuilder('comment')
-      .select('AVG(comment.rating)', 'avg')
-      .where('comment.productId = :productId', { productId })
-      .andWhere('comment.isActive = :isActive', { isActive: true })
-      .getRawOne();
+    const result: { avg: number | null } | undefined =
+      await this.commentsRepository
+        .createQueryBuilder('comment')
+        .select('AVG(comment.rating)', 'avg')
+        .where('comment.productId = :productId', { productId })
+        .andWhere('comment.isActive = :isActive', { isActive: true })
+        .getRawOne();
 
-    return result?.avg ? parseFloat(result.avg) : 0;
+    return result?.avg ? parseFloat(String(result.avg)) : 0;
   }
 }
-
