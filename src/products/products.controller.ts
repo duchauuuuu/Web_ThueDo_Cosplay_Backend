@@ -46,12 +46,14 @@ export class ProductsController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Sort by: mostFavorited, latest, etc.' })
   findAll(
     @Query() paginationDto: PaginationDto,
     @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,
   ) {
-    return this.productsService.findAll(paginationDto, categoryId, search);
+    return this.productsService.findAll(paginationDto, categoryId, search, sortBy);
   }
 
   @Get(':id')

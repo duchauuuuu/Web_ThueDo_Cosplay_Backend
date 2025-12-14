@@ -22,6 +22,7 @@ export class ProductsService {
     paginationDto: PaginationDto,
     categoryId?: string,
     search?: string,
+    sortBy?: string,
   ): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
@@ -42,13 +43,41 @@ export class ProductsService {
       );
     }
 
+    // Sort by favorites count if sortBy=mostFavorited
+    if (sortBy === 'mostFavorited') {
+      // Lọc favorites trong vòng 7 ngày gần đây
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      queryBuilder
+        .leftJoin('product.favorites', 'favorite', 'favorite.createdAt >= :sevenDaysAgo', { sevenDaysAgo })
+        .addSelect('COUNT(favorite.id)', 'favorite_count')
+        .groupBy('product.id')
+        .addGroupBy('category.id')
+        .orderBy('favorite_count', 'DESC')
+        .addOrderBy('product.createdAt', 'DESC');
+    } else if (sortBy === 'mostOrdered') {
+      // Lọc đơn hàng trong vòng 7 ngày gần đây
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      queryBuilder
+        .leftJoin('product.orderItems', 'orderItem')
+        .leftJoin('orderItem.order', 'order', 'order.createdAt >= :sevenDaysAgo', { sevenDaysAgo })
+        .addSelect('COUNT(orderItem.id)', 'order_count')
+        .groupBy('product.id')
+        .addGroupBy('category.id')
+        .orderBy('order_count', 'DESC')
+        .addOrderBy('product.createdAt', 'DESC');
+    } else {
+      queryBuilder.orderBy('product.createdAt', 'DESC');
+    }
+
     // Get total count BEFORE joining images and comments (to avoid duplicates)
     const total = await queryBuilder.getCount();
 
-    // Now get paginated results WITH images and comments
-    // IMPORTANT: Use take/skip BEFORE joins to get correct number of PRODUCTS
+    // Now get paginated results
     const data = await queryBuilder
-      .orderBy('product.createdAt', 'DESC')
       .skip(skip)
       .take(limit)
       .getMany();
