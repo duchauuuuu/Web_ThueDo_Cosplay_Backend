@@ -186,27 +186,75 @@ export class SeedService {
         isActive: true,
       },
       {
-        name: 'Manga',
-        description: 'Trang phục cosplay từ các bộ manga',
-        image: '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
-        isActive: true,
-      },
-      {
-        name: 'Game',
-        description: 'Trang phục cosplay nhân vật game',
-        image: '/img_clothes/anime/Boa Hancok One Piece (4)-min.jpg',
-        isActive: true,
-      },
-      {
-        name: 'K-Pop',
-        description: 'Trang phục cosplay K-Pop idols',
+        name: 'Đồng phục',
+        description: 'Trang phục đồng phục các loại: học sinh, công sở, y tế,...',
         image: '/img_clothes/dongPhucHocSinh/1.jpg',
         isActive: true,
       },
       {
-        name: 'Western',
-        description: 'Trang phục cosplay phim phương Tây',
+        name: 'Harry Potter',
+        description: 'Trang phục cosplay các nhân vật trong Harry Potter',
+        image: '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Halloween',
+        description: 'Trang phục Halloween kinh dị, ma quái',
+        image: '/img_clothes/anime/robot AI bó sát (2)-min.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Cổ tích',
+        description: 'Trang phục các nhân vật cổ tích: công chúa, hoàng tử,...',
+        image: '/img_clothes/coTich/4931f28604c685d4f18be7cae63cd165.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân',
+        description: 'Trang phục siêu anh hùng Marvel, DC Comics',
         image: '/img_clothes/coTrang/2f15ae551b1a2273725028f64955a607.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang',
+        description: 'Trang phục cổ trang Trung Hoa, Việt Nam, Nhật Bản',
+        image: '/img_clothes/coTrang/6243269c80ef4ead4e27a2b1bb317154.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Các nước',
+        description: 'Trang phục truyền thống các quốc gia trên thế giới',
+        image: '/img_clothes/anime/Boa Hancok One Piece (4)-min.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Cổ Tích Disney',
+        description: 'Trang phục công chúa và nhân vật Disney',
+        image: '/img_clothes/coTich/4931f28604c685d4f18be7cae63cd165.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Steampunk',
+        description: 'Phong cách Steampunk cổ điển',
+        image: '/img_clothes/anime/robot AI bó sát (3)-min.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Horror',
+        description: 'Trang phục kinh dị và Halloween',
+        image: '/img_clothes/anime/Akatsuki truyền naruto (5).jpg',
+        isActive: true,
+      },
+      {
+        name: 'Vocaloid',
+        description: 'Trang phục Vocaloid và Hatsune Miku',
+        image: '/img_clothes/dongPhucHocSinh/1.jpg',
+        isActive: true,
+      },
+      {
+        name: 'J-Pop Idol',
+        description: 'Trang phục J-Pop idol Nhật Bản',
+        image: '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
         isActive: true,
       },
     ];
@@ -223,10 +271,10 @@ export class SeedService {
 
   private async seedProducts(categories: Category[]): Promise<Product[]> {
     const products = [
+      // ANIME - 3 sản phẩm
       {
         name: 'Cosplay Naruto - Áo khoác Akatsuki',
-        description:
-          'Áo khoác Akatsuki chính hãng, chất liệu cao cấp, size M-L-XL. Phù hợp cho cosplay Naruto, Sasuke, Itachi...',
+        description: 'Áo khoác Akatsuki chính hãng, chất liệu cao cấp, size M-L-XL. Phù hợp cho cosplay Naruto.',
         price: 250000,
         deposit: 100000,
         quantity: 5,
@@ -239,11 +287,10 @@ export class SeedService {
       },
       {
         name: 'Cosplay Demon Slayer - Kimono Tanjiro',
-        description:
-          'Kimono Tanjiro Kamado với họa tiết đặc trưng, chất liệu vải mềm mại, size S-M-L.',
+        description: 'Kimono Tanjiro Kamado với họa tiết đặc trưng, chất liệu vải mềm mại.',
         price: 300000,
         deposit: 150000,
-        quantity: 3,
+        quantity: 4,
         size: 'S, M, L',
         color: 'Xanh lá, đen',
         brand: 'Anime Cosplay',
@@ -252,12 +299,11 @@ export class SeedService {
         isActive: true,
       },
       {
-        name: 'Cosplay One Piece - Áo khoác Luffy',
-        description:
-          'Áo khoác Straw Hat Pirates, chất liệu bền, size M-L-XL. Kèm theo mũ rơm.',
-        price: 280000,
-        deposit: 120000,
-        quantity: 4,
+        name: 'Cosplay One Piece - Luffy Gear 5',
+        description: 'Trang phục Luffy Gear 5 với áo khoác và quần, kèm mũ rơm.',
+        price: 350000,
+        deposit: 150000,
+        quantity: 3,
         size: 'M, L, XL',
         color: 'Đỏ, vàng',
         brand: 'Pirate Cosplay',
@@ -265,101 +311,264 @@ export class SeedService {
         isAvailable: true,
         isActive: true,
       },
+
+      // ĐỒNG PHỤC - 2 sản phẩm
       {
-        name: 'Cosplay Attack on Titan - Survey Corps Uniform',
-        description:
-          'Đồng phục Survey Corps với áo khoác và đai da, size S-M-L-XL. Chất liệu cao cấp.',
-        price: 350000,
-        deposit: 150000,
-        quantity: 2,
-        size: 'S, M, L, XL',
-        color: 'Nâu, trắng',
-        brand: 'Titan Cosplay',
-        categoryId: categories[0].id, // Anime
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Jujutsu Kaisen - Uniform Gojo',
-        description:
-          'Đồng phục Jujutsu High với áo khoác và kính đen, size M-L. Chất liệu tốt.',
-        price: 320000,
-        deposit: 150000,
-        quantity: 3,
-        size: 'M, L',
-        color: 'Xanh dương, trắng',
-        brand: 'Jujutsu Cosplay',
-        categoryId: categories[0].id, // Anime
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Genshin Impact - Outfit Hu Tao',
-        description:
-          'Trang phục Hu Tao từ Genshin Impact, đầy đủ phụ kiện, size S-M.',
-        price: 450000,
-        deposit: 200000,
-        quantity: 2,
-        size: 'S, M',
-        color: 'Đỏ, đen, vàng',
-        brand: 'Genshin Cosplay',
-        categoryId: categories[2].id, // Game
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay League of Legends - Ahri',
-        description:
-          'Trang phục Ahri với đuôi và phụ kiện, size S-M-L. Chất liệu cao cấp.',
-        price: 500000,
-        deposit: 250000,
-        quantity: 1,
+        name: 'Đồng phục học sinh Nhật Bản - Sailor',
+        description: 'Đồng phục học sinh Nhật kiểu sailor, chất liệu cotton cao cấp.',
+        price: 200000,
+        deposit: 80000,
+        quantity: 6,
         size: 'S, M, L',
-        color: 'Xanh, trắng',
-        brand: 'LoL Cosplay',
-        categoryId: categories[2].id, // Game
+        color: 'Xanh navy, trắng',
+        brand: 'School Uniform',
+        categoryId: categories[1].id, // Đồng phục
         isAvailable: true,
         isActive: true,
       },
       {
-        name: 'Cosplay K-Pop - BTS Dynamite Outfit',
-        description:
-          'Trang phục BTS Dynamite, phong cách retro, size M-L-XL.',
-        price: 280000,
-        deposit: 120000,
-        quantity: 4,
-        size: 'M, L, XL',
-        color: 'Nhiều màu',
-        brand: 'K-Pop Cosplay',
-        categoryId: categories[3].id, // K-Pop
+        name: 'Đồng phục học sinh Hàn Quốc',
+        description: 'Đồng phục học sinh Hàn Quốc với áo vest và váy xếp ly.',
+        price: 220000,
+        deposit: 90000,
+        quantity: 5,
+        size: 'S, M, L',
+        color: 'Xám, trắng',
+        brand: 'K-School',
+        categoryId: categories[1].id, // Đồng phục
         isAvailable: true,
         isActive: true,
       },
+
+      // HARRY POTTER - 3 sản phẩm
       {
-        name: 'Cosplay Marvel - Spider-Man Suit',
-        description:
-          'Đồ Spider-Man với chất liệu spandex, size M-L-XL. Có thể tùy chỉnh.',
-        price: 400000,
-        deposit: 200000,
-        quantity: 3,
-        size: 'M, L, XL',
-        color: 'Đỏ, xanh',
-        brand: 'Marvel Cosplay',
-        categoryId: categories[4].id, // Western
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Harry Potter - Robe Gryffindor',
-        description:
-          'Áo choàng Gryffindor chính hãng, kèm cà vạt và phù hiệu, size S-M-L-XL.',
+        name: 'Harry Potter - Áo choàng Gryffindor',
+        description: 'Áo choàng Gryffindor chính hãng với cà vạt và phù hiệu.',
         price: 350000,
         deposit: 150000,
-        quantity: 5,
+        quantity: 4,
         size: 'S, M, L, XL',
         color: 'Đỏ, vàng',
         brand: 'HP Cosplay',
-        categoryId: categories[4].id, // Western
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Harry Potter - Áo choàng Slytherin',
+        description: 'Áo choàng Slytherin với cà vạt xanh bạc và phù hiệu rắn.',
+        price: 350000,
+        deposit: 150000,
+        quantity: 3,
+        size: 'S, M, L, XL',
+        color: 'Xanh lá, bạc',
+        brand: 'HP Cosplay',
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Harry Potter - Áo choàng Hufflepuff',
+        description: 'Áo choàng Hufflepuff với cà vạt vàng đen và phù hiệu.',
+        price: 350000,
+        deposit: 150000,
+        quantity: 2,
+        size: 'S, M, L, XL',
+        color: 'Vàng, đen',
+        brand: 'HP Cosplay',
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // HALLOWEEN - 2 sản phẩm
+      {
+        name: 'Halloween - Trang phục ma cà rồng',
+        description: 'Trang phục ma cà rồng với áo choàng và răng nanh giả.',
+        price: 180000,
+        deposit: 80000,
+        quantity: 5,
+        size: 'M, L, XL',
+        color: 'Đen, đỏ',
+        brand: 'Halloween Store',
+        categoryId: categories[3].id, // Halloween
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Halloween - Trang phục phù thủy',
+        description: 'Trang phục phù thủy với mũ nhọn và áo choàng dài.',
+        price: 160000,
+        deposit: 70000,
+        quantity: 6,
+        size: 'S, M, L',
+        color: 'Đen, tím',
+        brand: 'Halloween Store',
+        categoryId: categories[3].id, // Halloween
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CỔ TÍCH - 3 sản phẩm
+      {
+        name: 'Cổ tích - Váy công chúa Elsa',
+        description: 'Váy công chúa Elsa Frozen với voan lấp lánh và phụ kiện.',
+        price: 400000,
+        deposit: 180000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Xanh da trời',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ tích - Váy công chúa Belle',
+        description: 'Váy công chúa Belle với váy vàng sang trọng.',
+        price: 380000,
+        deposit: 170000,
+        quantity: 4,
+        size: 'S, M, L',
+        color: 'Vàng',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ tích - Trang phục Nàng tiên cá Ariel',
+        description: 'Trang phục nàng tiên cá Ariel với đuôi cá và áo vỏ sò.',
+        price: 420000,
+        deposit: 200000,
+        quantity: 2,
+        size: 'S, M',
+        color: 'Xanh lá, tím',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // SIÊU NHÂN - 3 sản phẩm
+      {
+        name: 'Siêu nhân - Spider-Man Classic',
+        description: 'Đồ Spider-Man classic với chất liệu spandex co giãn tốt.',
+        price: 400000,
+        deposit: 180000,
+        quantity: 4,
+        size: 'M, L, XL',
+        color: 'Đỏ, xanh',
+        brand: 'Marvel Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân - Iron Man Mark 50',
+        description: 'Trang phục Iron Man với áo giáp chi tiết, đèn LED.',
+        price: 600000,
+        deposit: 300000,
+        quantity: 2,
+        size: 'M, L, XL',
+        color: 'Đỏ, vàng',
+        brand: 'Marvel Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân - Wonder Woman',
+        description: 'Trang phục Wonder Woman với áo giáp, váy và vương miện.',
+        price: 450000,
+        deposit: 200000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Đỏ, xanh, vàng',
+        brand: 'DC Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CỔ TRANG - 3 sản phẩm
+      {
+        name: 'Cổ trang - Hán phục Trung Quốc',
+        description: 'Hán phục Trung Quốc với áo dài và váy xếp ly sang trọng.',
+        price: 320000,
+        deposit: 140000,
+        quantity: 4,
+        size: 'S, M, L',
+        color: 'Đỏ, vàng',
+        brand: 'Hanfu Store',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang - Kimono Nhật Bản',
+        description: 'Kimono Nhật Bản truyền thống với họa tiết hoa anh đào.',
+        price: 300000,
+        deposit: 130000,
+        quantity: 5,
+        size: 'S, M, L',
+        color: 'Hồng, trắng',
+        brand: 'Kimono Shop',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang - Áo dài Việt Nam',
+        description: 'Áo dài Việt Nam với chất liệu lụa cao cấp.',
+        price: 280000,
+        deposit: 120000,
+        quantity: 6,
+        size: 'S, M, L',
+        color: 'Trắng, đỏ',
+        brand: 'Áo Dài Việt',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CÁC NƯỚC - 3 sản phẩm
+      {
+        name: 'Các nước - Hanbok Hàn Quốc',
+        description: 'Hanbok Hàn Quốc truyền thống với áo jeogori và váy chima.',
+        price: 350000,
+        deposit: 150000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Hồng, xanh',
+        brand: 'Hanbok Korea',
+        categoryId: categories[7].id, // Các nước
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Các nước - Sari Ấn Độ',
+        description: 'Sari Ấn Độ với vải lụa óng ả và trang sức đi kèm.',
+        price: 320000,
+        deposit: 140000,
+        quantity: 4,
+        size: 'Free size',
+        color: 'Vàng, đỏ, xanh',
+        brand: 'India Traditional',
+        categoryId: categories[7].id, // Các nước
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Các nước - Yukata Nhật Bản',
+        description: 'Yukata Nhật Bản mùa hè với họa tiết hoa đẹp mắt.',
+        price: 260000,
+        deposit: 110000,
+        quantity: 5,
+        size: 'S, M, L',
+        color: 'Xanh, hồng',
+        brand: 'Japan Traditional',
+        categoryId: categories[7].id, // Các nước
         isAvailable: true,
         isActive: true,
       },
