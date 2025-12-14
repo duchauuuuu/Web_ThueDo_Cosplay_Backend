@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import type { StringValue } from 'ms';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshToken } from '../entities/refresh-token.entity';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +20,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -53,10 +59,33 @@ export class AuthService {
     }
 
     const payload = { email: user.email, sub: user.id, role: user.role };
-    const accessToken = this.jwtService.sign(payload);
+    
+    // Generate access token (30 minutes)
+    const accessTokenExpires = (this.configService.get<string>('JWT_EXPIRES_IN') || '30m') as StringValue;
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: accessTokenExpires,
+    });
+
+    // Generate refresh token (30 days)
+    const refreshTokenExpires = (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '30d') as StringValue;
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: refreshTokenExpires,
+    });
+
+    // Save refresh token to database
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+
+    await this.refreshTokenRepository.save({
+      token: refreshToken,
+      userId: user.id,
+      expiresAt,
+      isRevoked: false,
+    });
 
     return {
       accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -64,6 +93,49 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      // Verify refresh token
+      const payload = this.jwtService.verify(refreshToken);
+
+      // Check if refresh token exists and is valid
+      const storedToken = await this.refreshTokenRepository.findOne({
+        where: { token: refreshToken, userId: payload.sub },
+      });
+
+      if (!storedToken || storedToken.isRevoked) {
+        throw new UnauthorizedException('Refresh token không hợp lệ');
+      }
+
+      if (new Date() > storedToken.expiresAt) {
+        throw new UnauthorizedException('Refresh token đã hết hạn');
+      }
+
+      // Generate new access token
+      const newPayload = {
+        email: payload.email,
+        sub: payload.sub,
+        role: payload.role,
+      };
+
+      const accessTokenExpires = (this.configService.get<string>('JWT_EXPIRES_IN') || '30m') as StringValue;
+      const accessToken = this.jwtService.sign(newPayload, {
+        expiresIn: accessTokenExpires,
+      });
+
+      return { accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token không hợp lệ');
+    }
+  }
+
+  async revokeRefreshToken(userId: string) {
+    await this.refreshTokenRepository.update(
+      { userId, isRevoked: false },
+      { isRevoked: true },
+    );
   }
 
   async validateUser(userId: string) {
