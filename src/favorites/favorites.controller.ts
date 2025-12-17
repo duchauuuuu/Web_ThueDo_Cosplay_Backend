@@ -23,6 +23,16 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
+  @Post('toggle/:productId')
+  @ApiOperation({ summary: 'Toggle sản phẩm yêu thích (thêm/xóa)' })
+  @ApiResponse({ status: 200, description: 'Thao tác thành công' })
+  toggleFavorite(
+    @CurrentUser() user: any,
+    @Param('productId') productId: string,
+  ) {
+    return this.favoritesService.toggleFavorite(user.id, productId);
+  }
+
   @Post(':productId')
   @ApiOperation({ summary: 'Thêm sản phẩm vào danh sách yêu thích' })
   @ApiResponse({ status: 201, description: 'Thêm thành công' })

@@ -72,9 +72,19 @@ export class AuthService {
       expiresIn: refreshTokenExpires,
     });
 
-    // Save refresh token to database
+    // Calculate expiresAt based on JWT_REFRESH_EXPIRES_IN
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+    const refreshExpiresStr = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '30d';
+    
+    // Parse days from format like '30d', '7d', '1d'
+    const daysMatch = refreshExpiresStr.match(/(\d+)d/);
+    if (daysMatch) {
+      const days = parseInt(daysMatch[1], 10);
+      expiresAt.setDate(expiresAt.getDate() + days);
+    } else {
+      // Fallback to 30 days if format is not recognized
+      expiresAt.setDate(expiresAt.getDate() + 30);
+    }
 
     await this.refreshTokenRepository.save({
       token: refreshToken,

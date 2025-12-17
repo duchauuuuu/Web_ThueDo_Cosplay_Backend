@@ -52,8 +52,10 @@ export class PaymentsService {
     if (savedPayment.method === PaymentMethod.SEPAY) {
       try {
         const paymentLink = await this.createSepayPaymentLink(savedPayment, order);
-        savedPayment.sepayOrderId = paymentLink.orderId;
-        savedPayment.callbackUrl = paymentLink.callbackUrl;
+        savedPayment.sepayOrderId = paymentLink.orderId || paymentLink.data?.orderId;
+        savedPayment.callbackUrl = paymentLink.callbackUrl || paymentLink.data?.callbackUrl;
+        // Lưu toàn bộ response từ SePay để có thể lấy QR code sau
+        savedPayment.sepayResponse = JSON.stringify(paymentLink);
         return this.paymentsRepository.save(savedPayment);
       } catch (error) {
         savedPayment.status = PaymentStatus.FAILED;

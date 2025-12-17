@@ -37,7 +37,16 @@ export class OrdersService {
       const orderItems: OrderItem[] = [];
 
       for (const item of createOrderDto.items) {
-        const product = await this.productsService.findOne(item.productId);
+        // Lấy product từ queryRunner để đảm bảo nằm trong transaction
+        const product = await queryRunner.manager.findOne(Product, {
+          where: { id: item.productId },
+        });
+
+        if (!product) {
+          throw new NotFoundException(
+            `Không tìm thấy sản phẩm với ID: ${item.productId}`,
+          );
+        }
 
         if (!product.isAvailable) {
           throw new BadRequestException(
@@ -51,10 +60,14 @@ export class OrdersService {
           );
         }
 
-        const itemPrice = product.price * item.quantity;
-        const itemDeposit = (product.deposit || 0) * item.quantity;
+        // Sử dụng giá giảm nếu có, nếu không thì dùng giá gốc
+        const finalPrice = product.discountPrice && product.discountPrice > 0 
+          ? product.discountPrice 
+          : product.price;
+        
+        const itemPrice = finalPrice * item.quantity;
         totalPrice += itemPrice;
-        totalDeposit += itemDeposit;
+        totalDeposit += 0; // Không còn tiền cọc
 
         // Giảm số lượng sản phẩm
         product.quantity -= item.quantity;
@@ -67,8 +80,8 @@ export class OrdersService {
         const orderItem = queryRunner.manager.create(OrderItem, {
           productId: item.productId,
           quantity: item.quantity,
-          price: product.price,
-          deposit: product.deposit || 0,
+          price: finalPrice,
+          deposit: 0, // Không còn tiền cọc
         });
         orderItems.push(orderItem);
       }
