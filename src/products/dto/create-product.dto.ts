@@ -33,7 +33,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  deposit?: number;
+  discountPrice?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()

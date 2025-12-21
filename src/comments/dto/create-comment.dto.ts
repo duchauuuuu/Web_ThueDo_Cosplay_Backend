@@ -1,4 +1,4 @@
-import { IsString, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsNumber, Min, Max, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDto {
@@ -19,5 +19,14 @@ export class CreateCommentDto {
   @ApiProperty({ description: 'ID của đơn hàng đã mua' })
   @IsString()
   orderId: string;
+
+  @ApiProperty({ description: 'URL ảnh đánh giá (tùy chọn)', required: false })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string; // Deprecated, dùng imageUrls
+
+  @ApiProperty({ description: 'URLs nhiều ảnh đánh giá (tùy chọn)', required: false, type: [String] })
+  @IsOptional()
+  imageUrls?: string[];
 }
 

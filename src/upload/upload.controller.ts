@@ -117,5 +117,45 @@ export class UploadController {
       throw new BadRequestException('Lỗi khi upload ảnh lên Cloudinary');
     }
   }
+
+  @Post('user-image')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  @ApiOperation({ summary: 'Upload một ảnh lên Cloudinary (User)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Upload thành công' })
+  async uploadUserImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('folder') folder?: string,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Không có file được upload');
+    }
+
+    try {
+      const result = await this.cloudinaryService.uploadImage(
+        file,
+        folder || 'reviews',
+      );
+      return {
+        url: result.secure_url,
+        publicId: result.public_id,
+        width: result.width,
+        height: result.height,
+      };
+    } catch (error) {
+      throw new BadRequestException('Lỗi khi upload ảnh lên Cloudinary');
+    }
+  }
 }
 

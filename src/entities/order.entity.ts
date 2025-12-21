@@ -12,7 +12,6 @@ import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { Payment } from './payment.entity';
 import { Comment } from './comment.entity';
-import { Invoice } from './invoice.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -55,6 +54,12 @@ export class Order {
   @Column({ nullable: true })
   notes: string; // Ghi chú
 
+  @Column({ nullable: true })
+  paymentMethod: string; // Phương thức thanh toán (cod, cash, bank_transfer, etc.)
+
+  @Column({ nullable: true })
+  paymentStatus: string; // Trạng thái thanh toán (pending, paid, completed, etc.)
+
   @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -72,9 +77,6 @@ export class Order {
 
   @OneToMany(() => Comment, (comment) => comment.order)
   comments: Comment[];
-
-  @OneToMany(() => Invoice, (invoice) => invoice.order)
-  invoices: Invoice[];
 
   @CreateDateColumn()
   createdAt: Date;

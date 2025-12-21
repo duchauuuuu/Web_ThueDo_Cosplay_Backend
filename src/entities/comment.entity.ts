@@ -13,7 +13,7 @@ import { Product } from './product.entity';
 import { Order } from './order.entity';
 
 @Entity('comments')
-@Unique(['orderId']) // Mỗi order chỉ có thể comment 1 lần
+// Bỏ unique constraint để cho phép comment nhiều products trong 1 order
 export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,6 +23,12 @@ export class Comment {
 
   @Column({ type: 'int', default: 5 })
   rating: number; // Đánh giá từ 1-5 sao
+
+  @Column({ type: 'text', nullable: true })
+  imageUrl: string | null; // URL ảnh đánh giá (optional) - deprecated, dùng imageUrls
+
+  @Column({ type: 'simple-array', nullable: true })
+  imageUrls: string[] | null; // URLs nhiều ảnh đánh giá (optional)
 
   @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn({ name: 'userId' })

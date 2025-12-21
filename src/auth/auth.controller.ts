@@ -25,5 +25,14 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Làm mới access token' })
+  @ApiResponse({ status: 200, description: 'Làm mới token thành công' })
+  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ' })
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    return this.authService.refreshAccessToken(refreshToken);
+  }
 }
 

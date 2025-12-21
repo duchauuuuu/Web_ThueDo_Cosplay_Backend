@@ -16,7 +16,6 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { ProductImagesModule } from './product-images/product-images.module';
 import { SeedModule } from './seed/seed.module';
-import { InvoicesModule } from './invoices/invoices.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { getDatabaseConfig } from './config/database.config';
 
@@ -44,7 +43,6 @@ import { getDatabaseConfig } from './config/database.config';
     AddressesModule,
     ProductImagesModule,
     SeedModule,
-    InvoicesModule,
     VouchersModule,
   ],
   controllers: [AppController],

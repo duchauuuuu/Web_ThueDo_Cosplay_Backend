@@ -16,6 +16,30 @@ export class FavoritesService {
     private productsService: ProductsService,
   ) {}
 
+  async toggleFavorite(userId: string, productId: string): Promise<{ message: string; action: 'Added' | 'Removed' }> {
+    // Kiểm tra sản phẩm tồn tại
+    await this.productsService.findOne(productId);
+
+    // Kiểm tra đã có trong favorites chưa
+    const existing = await this.favoritesRepository.findOne({
+      where: { userId, productId },
+    });
+
+    if (existing) {
+      // Nếu đã có thì xóa
+      await this.favoritesRepository.remove(existing);
+      return { message: 'Đã xóa khỏi danh sách yêu thích', action: 'Removed' };
+    } else {
+      // Nếu chưa có thì thêm
+      const favorite = this.favoritesRepository.create({
+        userId,
+        productId,
+      });
+      await this.favoritesRepository.save(favorite);
+      return { message: 'Đã thêm vào danh sách yêu thích', action: 'Added' };
+    }
+  }
+
   async addToFavorites(userId: string, productId: string): Promise<Favorite> {
     // Kiểm tra sản phẩm tồn tại
     await this.productsService.findOne(productId);

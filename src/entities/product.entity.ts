@@ -32,7 +32,7 @@ export class Product {
   price: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  deposit: number; // Tiền cọc
+  discountPrice: number; // Giá giảm
 
   @Column({ default: 0 })
   quantity: number; // Số lượng có sẵn

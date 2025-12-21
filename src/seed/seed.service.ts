@@ -16,6 +16,7 @@ import {
 } from '../entities/payment.entity';
 import { Comment } from '../entities/comment.entity';
 import { Favorite } from '../entities/favorite.entity';
+import { Voucher, VoucherDiscountType } from '../entities/voucher.entity';
 
 @Injectable()
 export class SeedService {
@@ -40,51 +41,84 @@ export class SeedService {
     private commentsRepository: Repository<Comment>,
     @InjectRepository(Favorite)
     private favoritesRepository: Repository<Favorite>,
+    @InjectRepository(Voucher)
+    private vouchersRepository: Repository<Voucher>,
   ) {}
 
   async seed() {
-    console.log('🌱 Bắt đầu seed dữ liệu...');
+    try {
+      console.log('🌱 Bắt đầu seed dữ liệu...');
 
-    // Clear existing data (optional - chỉ trong development)
-    await this.clearData();
+      // Clear existing data (optional - chỉ trong development)
+      await this.clearData();
 
-    // Seed Users
-    const users = await this.seedUsers();
-    console.log(`✅ Đã tạo ${users.length} users`);
+      // Seed Users
+      const users = await this.seedUsers();
+      console.log(`✅ Đã tạo ${users.length} users`);
 
-    // Seed Categories
-    const categories = await this.seedCategories();
-    console.log(`✅ Đã tạo ${categories.length} categories`);
+      // Seed Categories
+      const categories = await this.seedCategories();
+      console.log(`✅ Đã tạo ${categories.length} categories`);
+      console.log('📋 Categories:', categories.map(c => ({ id: c.id, name: c.name })));
 
-    // Seed Products
-    const products = await this.seedProducts(categories);
-    console.log(`✅ Đã tạo ${products.length} products`);
+      // Seed Products
+      const products = await this.seedProducts(categories);
+      console.log(`✅ Đã tạo ${products.length} products`);
+      console.log('📋 Products:', products.map(p => ({ id: p.id, name: p.name, isActive: p.isActive })));
 
-    // Seed Product Images
-    await this.seedProductImages(products);
-    console.log(`✅ Đã tạo product images`);
+      // Verify products in database
+      const allProducts = await this.productsRepository.find();
+      console.log(`🔍 Verify: Database hiện có ${allProducts.length} products (isActive: ${allProducts.filter(p => p.isActive).length})`);
 
-    // Seed Addresses
-    await this.seedAddresses(users);
-    console.log(`✅ Đã tạo addresses`);
+      // Seed Product Images
+      await this.seedProductImages(products);
+      console.log(`✅ Đã tạo product images`);
 
-    // Seed Favorites
-    const favorites = await this.seedFavorites(users, products);
-    console.log(`✅ Đã tạo ${favorites.length} favorites`);
+      // Seed Addresses
+      await this.seedAddresses(users);
+      console.log(`✅ Đã tạo addresses`);
 
-    // Seed Orders
-    const orders = await this.seedOrders(users, products);
-    console.log(`✅ Đã tạo ${orders.length} orders`);
+      // Seed Favorites
+      const favorites = await this.seedFavorites(users, products);
+      console.log(`✅ Đã tạo ${favorites.length} favorites`);
 
-    // Seed Payments
-    const payments = await this.seedPayments(orders);
-    console.log(`✅ Đã tạo ${payments.length} payments`);
+      // Seed Orders
+      const orders = await this.seedOrders(users, products);
+      console.log(`✅ Đã tạo ${orders.length} orders`);
 
-    // Seed Comments
-    const comments = await this.seedComments(users, orders);
-    console.log(`✅ Đã tạo ${comments.length} comments`);
+      // Seed Payments
+      const payments = await this.seedPayments(orders);
+      console.log(`✅ Đã tạo ${payments.length} payments`);
 
-    console.log('🎉 Hoàn thành seed dữ liệu!');
+      // Seed Comments
+      const comments = await this.seedComments(users, orders);
+      console.log(`✅ Đã tạo ${comments.length} comments`);
+
+      // Seed Vouchers
+      const vouchers = await this.seedVouchers();
+      console.log(`✅ Đã tạo ${vouchers.length} vouchers`);
+
+      console.log('🎉 Hoàn thành seed dữ liệu!');
+      
+      return {
+        success: true,
+        counts: {
+          users: users.length,
+          categories: categories.length,
+          products: products.length,
+          productsInDb: allProducts.length,
+          activeProducts: allProducts.filter(p => p.isActive).length,
+          favorites: favorites.length,
+          orders: orders.length,
+          payments: payments.length,
+          comments: comments.length,
+          vouchers: vouchers.length,
+        }
+      };
+    } catch (error) {
+      console.error('❌ Lỗi khi seed dữ liệu:', error);
+      throw error;
+    }
   }
 
   private async clearData() {
@@ -94,6 +128,7 @@ export class SeedService {
     await this.orderItemsRepository.createQueryBuilder().delete().execute();
     await this.ordersRepository.createQueryBuilder().delete().execute();
     await this.favoritesRepository.createQueryBuilder().delete().execute();
+    await this.vouchersRepository.createQueryBuilder().delete().execute();
     await this.productImagesRepository.createQueryBuilder().delete().execute();
     await this.addressesRepository.createQueryBuilder().delete().execute();
     await this.productsRepository.createQueryBuilder().delete().execute();
@@ -147,31 +182,79 @@ export class SeedService {
       {
         name: 'Anime',
         description: 'Trang phục cosplay các nhân vật anime nổi tiếng',
-        image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
+        image: '/img_clothes/anime/Akatsuki truyện naruto (4).jpg',
         isActive: true,
       },
       {
-        name: 'Manga',
-        description: 'Trang phục cosplay từ các bộ manga',
-        image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500',
+        name: 'Đồng phục',
+        description: 'Trang phục đồng phục các loại: học sinh, công sở, y tế,...',
+        image: '/img_clothes/dongPhucHocSinh/1.jpg',
         isActive: true,
       },
       {
-        name: 'Game',
-        description: 'Trang phục cosplay nhân vật game',
-        image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500',
+        name: 'Harry Potter',
+        description: 'Trang phục cosplay các nhân vật trong Harry Potter',
+        image: '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
         isActive: true,
       },
       {
-        name: 'K-Pop',
-        description: 'Trang phục cosplay K-Pop idols',
-        image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500',
+        name: 'Halloween',
+        description: 'Trang phục Halloween kinh dị, ma quái',
+        image: '/img_clothes/anime/robot AI bó sát (2)-min.jpg',
         isActive: true,
       },
       {
-        name: 'Western',
-        description: 'Trang phục cosplay phim phương Tây',
-        image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500',
+        name: 'Cổ tích',
+        description: 'Trang phục các nhân vật cổ tích: công chúa, hoàng tử,...',
+        image: '/img_clothes/coTich/4931f28604c685d4f18be7cae63cd165.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân',
+        description: 'Trang phục siêu anh hùng Marvel, DC Comics',
+        image: '/img_clothes/coTrang/2f15ae551b1a2273725028f64955a607.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang',
+        description: 'Trang phục cổ trang Trung Hoa, Việt Nam, Nhật Bản',
+        image: '/img_clothes/coTrang/6243269c80ef4ead4e27a2b1bb317154.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Các nước',
+        description: 'Trang phục truyền thống các quốc gia trên thế giới',
+        image: '/img_clothes/anime/Boa Hancok One Piece (4)-min.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Cổ Tích Disney',
+        description: 'Trang phục công chúa và nhân vật Disney',
+        image: '/img_clothes/coTich/4931f28604c685d4f18be7cae63cd165.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Steampunk',
+        description: 'Phong cách Steampunk cổ điển',
+        image: '/img_clothes/anime/robot AI bó sát (3)-min.jpg',
+        isActive: true,
+      },
+      {
+        name: 'Horror',
+        description: 'Trang phục kinh dị và Halloween',
+        image: '/img_clothes/anime/Akatsuki truyền naruto (5).jpg',
+        isActive: true,
+      },
+      {
+        name: 'Vocaloid',
+        description: 'Trang phục Vocaloid và Hatsune Miku',
+        image: '/img_clothes/dongPhucHocSinh/1.jpg',
+        isActive: true,
+      },
+      {
+        name: 'J-Pop Idol',
+        description: 'Trang phục J-Pop idol Nhật Bản',
+        image: '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
         isActive: true,
       },
     ];
@@ -188,12 +271,12 @@ export class SeedService {
 
   private async seedProducts(categories: Category[]): Promise<Product[]> {
     const products = [
+      // ANIME - 3 sản phẩm
       {
         name: 'Cosplay Naruto - Áo khoác Akatsuki',
-        description:
-          'Áo khoác Akatsuki chính hãng, chất liệu cao cấp, size M-L-XL. Phù hợp cho cosplay Naruto, Sasuke, Itachi...',
+        description: 'Áo khoác Akatsuki chính hãng, chất liệu cao cấp, size M-L-XL. Phù hợp cho cosplay Naruto.',
         price: 250000,
-        deposit: 100000,
+        discountPrice: 220000,
         quantity: 5,
         size: 'M, L, XL',
         color: 'Đỏ đen',
@@ -204,11 +287,10 @@ export class SeedService {
       },
       {
         name: 'Cosplay Demon Slayer - Kimono Tanjiro',
-        description:
-          'Kimono Tanjiro Kamado với họa tiết đặc trưng, chất liệu vải mềm mại, size S-M-L.',
+        description: 'Kimono Tanjiro Kamado với họa tiết đặc trưng, chất liệu vải mềm mại.',
         price: 300000,
-        deposit: 150000,
-        quantity: 3,
+        discountPrice: 270000,
+        quantity: 4,
         size: 'S, M, L',
         color: 'Xanh lá, đen',
         brand: 'Anime Cosplay',
@@ -217,12 +299,11 @@ export class SeedService {
         isActive: true,
       },
       {
-        name: 'Cosplay One Piece - Áo khoác Luffy',
-        description:
-          'Áo khoác Straw Hat Pirates, chất liệu bền, size M-L-XL. Kèm theo mũ rơm.',
-        price: 280000,
-        deposit: 120000,
-        quantity: 4,
+        name: 'Cosplay One Piece - Luffy Gear 5',
+        description: 'Trang phục Luffy Gear 5 với áo khoác và quần, kèm mũ rơm.',
+        price: 350000,
+        discountPrice: 270000,
+        quantity: 3,
         size: 'M, L, XL',
         color: 'Đỏ, vàng',
         brand: 'Pirate Cosplay',
@@ -230,101 +311,262 @@ export class SeedService {
         isAvailable: true,
         isActive: true,
       },
+
+      // ĐỒNG PHỤC - 2 sản phẩm
       {
-        name: 'Cosplay Attack on Titan - Survey Corps Uniform',
-        description:
-          'Đồng phục Survey Corps với áo khoác và đai da, size S-M-L-XL. Chất liệu cao cấp.',
-        price: 350000,
-        deposit: 150000,
-        quantity: 2,
-        size: 'S, M, L, XL',
-        color: 'Nâu, trắng',
-        brand: 'Titan Cosplay',
-        categoryId: categories[0].id, // Anime
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Jujutsu Kaisen - Uniform Gojo',
-        description:
-          'Đồng phục Jujutsu High với áo khoác và kính đen, size M-L. Chất liệu tốt.',
-        price: 320000,
-        deposit: 150000,
-        quantity: 3,
-        size: 'M, L',
-        color: 'Xanh dương, trắng',
-        brand: 'Jujutsu Cosplay',
-        categoryId: categories[0].id, // Anime
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Genshin Impact - Outfit Hu Tao',
-        description:
-          'Trang phục Hu Tao từ Genshin Impact, đầy đủ phụ kiện, size S-M.',
-        price: 450000,
-        deposit: 200000,
-        quantity: 2,
-        size: 'S, M',
-        color: 'Đỏ, đen, vàng',
-        brand: 'Genshin Cosplay',
-        categoryId: categories[2].id, // Game
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay League of Legends - Ahri',
-        description:
-          'Trang phục Ahri với đuôi và phụ kiện, size S-M-L. Chất liệu cao cấp.',
-        price: 500000,
-        deposit: 250000,
-        quantity: 1,
+        name: 'Đồng phục học sinh Nhật Bản - Sailor',
+        description: 'Đồng phục học sinh Nhật kiểu sailor, chất liệu cotton cao cấp.',
+        price: 200000,
+        discountPrice: 170000,
+        quantity: 6,
         size: 'S, M, L',
-        color: 'Xanh, trắng',
-        brand: 'LoL Cosplay',
-        categoryId: categories[2].id, // Game
+        color: 'Xanh navy, trắng',
+        brand: 'School Uniform',
+        categoryId: categories[1].id, // Đồng phục
         isAvailable: true,
         isActive: true,
       },
       {
-        name: 'Cosplay K-Pop - BTS Dynamite Outfit',
-        description:
-          'Trang phục BTS Dynamite, phong cách retro, size M-L-XL.',
-        price: 280000,
-        deposit: 120000,
-        quantity: 4,
-        size: 'M, L, XL',
-        color: 'Nhiều màu',
-        brand: 'K-Pop Cosplay',
-        categoryId: categories[3].id, // K-Pop
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Marvel - Spider-Man Suit',
-        description:
-          'Đồ Spider-Man với chất liệu spandex, size M-L-XL. Có thể tùy chỉnh.',
-        price: 400000,
-        deposit: 200000,
-        quantity: 3,
-        size: 'M, L, XL',
-        color: 'Đỏ, xanh',
-        brand: 'Marvel Cosplay',
-        categoryId: categories[4].id, // Western
-        isAvailable: true,
-        isActive: true,
-      },
-      {
-        name: 'Cosplay Harry Potter - Robe Gryffindor',
-        description:
-          'Áo choàng Gryffindor chính hãng, kèm cà vạt và phù hiệu, size S-M-L-XL.',
-        price: 350000,
-        deposit: 150000,
+        name: 'Đồng phục học sinh Hàn Quốc',
+        description: 'Đồng phục học sinh Hàn Quốc với áo vest và váy xếp ly.',
+        price: 220000,
+        discountPrice: 190000,
         quantity: 5,
+        size: 'S, M, L',
+        color: 'Xám, trắng',
+        brand: 'K-School',
+        categoryId: categories[1].id, // Đồng phục
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // HARRY POTTER - 3 sản phẩm
+      {
+        name: 'Harry Potter - Áo choàng Gryffindor',
+        description: 'Áo choàng Gryffindor chính hãng với cà vạt và phù hiệu.',
+        price: 350000,
+        discountPrice: 270000,
+        quantity: 4,
         size: 'S, M, L, XL',
         color: 'Đỏ, vàng',
         brand: 'HP Cosplay',
-        categoryId: categories[4].id, // Western
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Harry Potter - Áo choàng Slytherin',
+        description: 'Áo choàng Slytherin với cà vạt xanh bạc và phù hiệu rắn.',
+        price: 350000,
+        discountPrice: 270000,
+        quantity: 3,
+        size: 'S, M, L, XL',
+        color: 'Xanh lá, bạc',
+        brand: 'HP Cosplay',
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Harry Potter - Áo choàng Hufflepuff',
+        description: 'Áo choàng Hufflepuff với cà vạt vàng đen và phù hiệu.',
+        price: 350000,
+        discountPrice: 270000,
+        quantity: 2,
+        size: 'S, M, L, XL',
+        color: 'Vàng, đen',
+        brand: 'HP Cosplay',
+        categoryId: categories[2].id, // Harry Potter
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // HALLOWEEN - 2 sản phẩm
+      {
+        name: 'Halloween - Trang phục ma cà rồng',
+        description: 'Trang phục ma cà rồng với áo choàng và răng nanh giả.',
+        price: 180000,
+        discountPrice: 170000,
+        quantity: 5,
+        size: 'M, L, XL',
+        color: 'Đen, đỏ',
+        brand: 'Halloween Store',
+        categoryId: categories[3].id, // Halloween
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Halloween - Trang phục phù thủy',
+        description: 'Trang phục phù thủy với mũ nhọn và áo choàng dài.',
+        price: 160000,
+        quantity: 6,
+        size: 'S, M, L',
+        color: 'Đen, tím',
+        brand: 'Halloween Store',
+        categoryId: categories[3].id, // Halloween
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CỔ TÍCH - 3 sản phẩm
+      {
+        name: 'Cổ tích - Váy công chúa Elsa',
+        description: 'Váy công chúa Elsa Frozen với voan lấp lánh và phụ kiện.',
+        price: 400000,
+        discountPrice: 350000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Xanh da trời',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ tích - Váy công chúa Belle',
+        description: 'Váy công chúa Belle với váy vàng sang trọng.',
+        price: 380000,
+        discountPrice: 340000,
+        quantity: 4,
+        size: 'S, M, L',
+        color: 'Vàng',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ tích - Trang phục Nàng tiên cá Ariel',
+        description: 'Trang phục nàng tiên cá Ariel với đuôi cá và áo vỏ sò.',
+        price: 420000,
+        discountPrice: 380000,
+        quantity: 2,
+        size: 'S, M',
+        color: 'Xanh lá, tím',
+        brand: 'Disney Cosplay',
+        categoryId: categories[4].id, // Cổ tích
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // SIÊU NHÂN - 3 sản phẩm
+      {
+        name: 'Siêu nhân - Spider-Man Classic',
+        description: 'Đồ Spider-Man classic với chất liệu spandex co giãn tốt.',
+        price: 400000,
+        discountPrice: 350000,
+        quantity: 4,
+        size: 'M, L, XL',
+        color: 'Đỏ, xanh',
+        brand: 'Marvel Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân - Iron Man Mark 50',
+        description: 'Trang phục Iron Man với áo giáp chi tiết, đèn LED.',
+        price: 600000,
+        discountPrice: 540000,
+        quantity: 2,
+        size: 'M, L, XL',
+        color: 'Đỏ, vàng',
+        brand: 'Marvel Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Siêu nhân - Wonder Woman',
+        description: 'Trang phục Wonder Woman với áo giáp, váy và vương miện.',
+        price: 450000,
+        discountPrice: 380000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Đỏ, xanh, vàng',
+        brand: 'DC Cosplay',
+        categoryId: categories[5].id, // Siêu nhân
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CỔ TRANG - 3 sản phẩm
+      {
+        name: 'Cổ trang - Hán phục Trung Quốc',
+        description: 'Hán phục Trung Quốc với áo dài và váy xếp ly sang trọng.',
+        price: 320000,
+        discountPrice: 280000,
+        quantity: 4,
+        size: 'S, M, L',
+        color: 'Đỏ, vàng',
+        brand: 'Hanfu Store',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang - Kimono Nhật Bản',
+        description: 'Kimono Nhật Bản truyền thống với họa tiết hoa anh đào.',
+        price: 300000,
+        discountPrice: 270000,
+        quantity: 5,
+        size: 'S, M, L',
+        color: 'Hồng, trắng',
+        brand: 'Kimono Shop',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Cổ trang - Áo dài Việt Nam',
+        description: 'Áo dài Việt Nam với chất liệu lụa cao cấp.',
+        price: 280000,
+        discountPrice: 250000,
+        quantity: 6,
+        size: 'S, M, L',
+        color: 'Trắng, đỏ',
+        brand: 'Áo Dài Việt',
+        categoryId: categories[6].id, // Cổ trang
+        isAvailable: true,
+        isActive: true,
+      },
+
+      // CÁC NƯỚC - 3 sản phẩm
+      {
+        name: 'Các nước - Hanbok Hàn Quốc',
+        description: 'Hanbok Hàn Quốc truyền thống với áo jeogori và váy chima.',
+        price: 350000,
+        discountPrice: 270000,
+        quantity: 3,
+        size: 'S, M, L',
+        color: 'Hồng, xanh',
+        brand: 'Hanbok Korea',
+        categoryId: categories[7].id, // Các nước
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Các nước - Sari Ấn Độ',
+        description: 'Sari Ấn Độ với vải lụa óng ả và trang sức đi kèm.',
+        price: 320000,
+        discountPrice: 280000,
+        quantity: 4,
+        size: 'Free size',
+        color: 'Vàng, đỏ, xanh',
+        brand: 'India Traditional',
+        categoryId: categories[7].id, // Các nước
+        isAvailable: true,
+        isActive: true,
+      },
+      {
+        name: 'Các nước - Yukata Nhật Bản',
+        description: 'Yukata Nhật Bản mùa hè với họa tiết hoa đẹp mắt.',
+        price: 260000,
+        quantity: 5,
+        size: 'S, M, L',
+        color: 'Xanh, hồng',
+        brand: 'Japan Traditional',
+        categoryId: categories[7].id, // Các nước
         isAvailable: true,
         isActive: true,
       },
@@ -341,15 +583,87 @@ export class SeedService {
   }
 
   private async seedProductImages(products: Product[]): Promise<void> {
+    // TODO: Thay đổi các URLs này thành ảnh thực tế của bạn
+    // Cách 1: Đặt ảnh trong public folder của frontend
+    // Cách 2: Upload lên Cloudinary và lấy URL
+    // Cách 3: Sử dụng Google Drive public links (xem hướng dẫn bên dưới)
+
     const imageUrls = [
-      'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800',
-      'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800',
-      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
-      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
+      // Anime
+      '/img_clothes/anime/Akatsuki truyện naruto (4).jpg',
+      '/img_clothes/anime/Akatsuki truyện naruto (5).jpg',
+      '/img_clothes/anime/Boa Hancok One Piece (4)-min.jpg',
+      '/img_clothes/anime/Boa Hancok One Piece (6)-min (1).jpg',
+      '/img_clothes/anime/robot AI bó sát (2)-min.jpg',
+      '/img_clothes/anime/robot AI bó sát (3)-min.jpg',
+      '/img_clothes/anime/robot ai nam (1)-min.jpg',
+      '/img_clothes/anime/robot ai nam (2)-min.jpg',
+      '/img_clothes/anime/Shenhe-Cosplay-1.jpg',
+      '/img_clothes/anime/Shenhe-Cosplay-5.jpg',
+      '/img_clothes/anime/Shenhe-Cosplay-7.jpg',
+      '/img_clothes/anime/Shenhe-Cosplay-9.jpg',
+      '/img_clothes/anime/Zoro One piece (1).jpg',
+      '/img_clothes/anime/Zoro One piece (2).jpg',
+      '/img_clothes/anime/cosplay D.VA game Overwatch (2)-min.jpg',
+      '/img_clothes/anime/cosplay D.VA game Overwatch (5)-min.jpg',
+      '/img_clothes/anime/songoku-min.jpg',
+      '/img_clothes/anime/succubus khách hàng jun vũ (1)-min.jpg',
+      '/img_clothes/anime/hầu gái nam maid đen trắng (2).jpg',
+      '/img_clothes/anime/hầu gái nam maid đen trắng (4).jpg',
+      '/img_clothes/anime/hầu gái ngắn màu đen trắng (1).jpg',
+      '/img_clothes/anime/hầu gái ngắn màu đen trắng (2).jpg',
+      '/img_clothes/anime/loat-hinh-anh-cosplay-anime-sieu-dinh-cua-coser-xinh-dep-senyamiku3.jpg',
+      '/img_clothes/anime/loat-hinh-anh-cosplay-anime-sieu-dinh-cua-coser-xinh-dep-senyamiku5.jpg',
+      '/img_clothes/anime/1.png',
+      '/img_clothes/anime/2.png',
+      
+      // Cổ Tích
+      '/img_clothes/coTich/000aa6833cdc1c0415c4b11a8495510d.jpg',
+      '/img_clothes/coTich/4931f28604c685d4f18be7cae63cd165.jpg',
+      '/img_clothes/coTich/4b90eb3353f027ae99ecb21e66fc14d3.jpg',
+      '/img_clothes/coTich/8883de06ff0dbc5ee10d9310c9ff51cd.jpg',
+      '/img_clothes/coTich/92ffb19f91216e9b0efe8f276e159bac.jpg',
+      '/img_clothes/coTich/c46d5df0999df54df2c6a65223c6eaa5.jpg',
+      '/img_clothes/coTich/ebb8a7134d0baea1c900bb769ae1ab74.jpg',
+      
+      // Cổ Trang
+      '/img_clothes/coTrang/2f15ae551b1a2273725028f64955a607.jpg',
+      '/img_clothes/coTrang/6243269c80ef4ead4e27a2b1bb317154.jpg',
+      '/img_clothes/coTrang/ad2968417d9ba21effc2bcf68ee9f506.jpg',
+      '/img_clothes/coTrang/b406f5ecbdd65e0804b008ed7f3aef73.jpg',
+      '/img_clothes/coTrang/chup-anh-co-trang__19__a149e2bce3964e148f53715104946b15.jpg',
+      '/img_clothes/coTrang/chup-anh-co-trang__44__b7b8b9e19a6347cb952f190c79d9ef1b.jpg',
+      '/img_clothes/coTrang/phu-kien-co-trang-dep-va-hot-trend.jpg',
+      
+      // Đồng Phục Học Sinh
+      '/img_clothes/dongPhucHocSinh/0430f42f54c83df341e3bc667e210891.jpg',
+      '/img_clothes/dongPhucHocSinh/15f1421c07a7dfcc46702acc057f2bbf.jpg',
+      '/img_clothes/dongPhucHocSinh/4fea79e7ec0237753af7ca76f4504c27.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nam sinh hàn quốc (1)-min.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nam sinh hàn quốc (2)-min.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nhật màu xanh navy (2).jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nhật màu xanh navy.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh hàn quốc (1)-min.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh hàn quốc (3)-min.jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh nhật bản dài tay (1).jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh nhật bản dài tay (2).jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh nhật yun cosplay (12).jpg',
+      '/img_clothes/dongPhucHocSinh/đồng phục nữ sinh nhật yun cosplay (23).jpg',
+      '/img_clothes/dongPhucHocSinh/gakuran đồng phục nam sinh nhật bản (12)-min.jpg',
+      '/img_clothes/dongPhucHocSinh/gakuran đồng phục nam sinh nhật bản (13)-min.jpg',
     ];
 
-    for (const product of products) {
-      const images = imageUrls.slice(0, 3).map((url, index) => ({
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      // Mỗi product có 3 ảnh
+      const startIndex = (i * 3) % imageUrls.length;
+      const productImages = [
+        imageUrls[startIndex % imageUrls.length],
+        imageUrls[(startIndex + 1) % imageUrls.length],
+        imageUrls[(startIndex + 2) % imageUrls.length],
+      ];
+
+      const images = productImages.map((url, index) => ({
         url,
         publicId: `cosplay/products/${product.id}/${index}`,
         alt: `${product.name} - Ảnh ${index + 1}`,
@@ -459,7 +773,7 @@ export class SeedService {
         userId: regularUsers[0].id,
         status: OrderStatus.CONFIRMED,
         totalPrice: products[0].price * 1 + products[1].price * 1,
-        totalDeposit: (products[0].deposit || 0) * 1 + (products[1].deposit || 0) * 1,
+        totalDeposit: 0,
         rentalStartDate: new Date('2024-01-15'),
         rentalEndDate: new Date('2024-01-20'),
         rentalAddress: '123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh',
@@ -474,14 +788,14 @@ export class SeedService {
           productId: products[0].id,
           quantity: 1,
           price: products[0].price,
-          deposit: products[0].deposit || 0,
+          deposit: 0,
         }),
         this.orderItemsRepository.create({
           orderId: savedOrder1.id,
           productId: products[1].id,
           quantity: 1,
           price: products[1].price,
-          deposit: products[1].deposit || 0,
+          deposit: 0,
         }),
       ]);
       orders.push(savedOrder1);
@@ -492,7 +806,7 @@ export class SeedService {
         userId: regularUsers[0].id,
         status: OrderStatus.RENTED,
         totalPrice: products[2].price * 2,
-        totalDeposit: (products[2].deposit || 0) * 2,
+        totalDeposit: 0,
         rentalStartDate: new Date('2024-01-10'),
         rentalEndDate: new Date('2024-01-17'),
         rentalAddress: '123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh',
@@ -506,7 +820,7 @@ export class SeedService {
           productId: products[2].id,
           quantity: 2,
           price: products[2].price,
-          deposit: products[2].deposit || 0,
+          deposit: 0,
         }),
       );
       orders.push(savedOrder2);
@@ -517,7 +831,7 @@ export class SeedService {
         userId: regularUsers[0].id,
         status: OrderStatus.RETURNED,
         totalPrice: products[3].price * 1,
-        totalDeposit: (products[3].deposit || 0) * 1,
+        totalDeposit: 0,
         rentalStartDate: new Date('2024-01-01'),
         rentalEndDate: new Date('2024-01-08'),
         rentalAddress: '123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh',
@@ -531,7 +845,7 @@ export class SeedService {
           productId: products[3].id,
           quantity: 1,
           price: products[3].price,
-          deposit: products[3].deposit || 0,
+          deposit: 0,
         }),
       );
       orders.push(savedOrder3);
@@ -545,7 +859,7 @@ export class SeedService {
         userId: regularUsers[1].id,
         status: OrderStatus.CONFIRMED,
         totalPrice: products[4].price * 1,
-        totalDeposit: (products[4].deposit || 0) * 1,
+        totalDeposit: 0,
         rentalStartDate: new Date('2024-01-20'),
         rentalEndDate: new Date('2024-01-25'),
         rentalAddress: '456 Đường XYZ, Phường 2, Quận 3, TP. Hồ Chí Minh',
@@ -559,7 +873,7 @@ export class SeedService {
           productId: products[4].id,
           quantity: 1,
           price: products[4].price,
-          deposit: products[4].deposit || 0,
+          deposit: 0,
         }),
       );
       orders.push(savedOrder4);
@@ -570,7 +884,7 @@ export class SeedService {
         userId: regularUsers[1].id,
         status: OrderStatus.RENTED,
         totalPrice: products[5].price * 1 + products[6].price * 1,
-        totalDeposit: (products[5].deposit || 0) * 1 + (products[6].deposit || 0) * 1,
+        totalDeposit: 0,
         rentalStartDate: new Date('2024-01-12'),
         rentalEndDate: new Date('2024-01-19'),
         rentalAddress: '456 Đường XYZ, Phường 2, Quận 3, TP. Hồ Chí Minh',
@@ -584,14 +898,14 @@ export class SeedService {
           productId: products[5].id,
           quantity: 1,
           price: products[5].price,
-          deposit: products[5].deposit || 0,
+          deposit: 0,
         }),
         this.orderItemsRepository.create({
           orderId: savedOrder5.id,
           productId: products[6].id,
           quantity: 1,
           price: products[6].price,
-          deposit: products[6].deposit || 0,
+          deposit: 0,
         }),
       ]);
       orders.push(savedOrder5);
@@ -646,26 +960,29 @@ export class SeedService {
         order.status === OrderStatus.RETURNED,
     );
 
+    const ratings = [5, 4, 5, 4, 5, 3, 4, 5]; // Đánh giá mẫu
+    const contents = [
+      'Sản phẩm rất đẹp, chất lượng tốt!',
+      'Giao hàng nhanh, sản phẩm như mô tả.',
+      'Rất hài lòng với dịch vụ, sẽ quay lại!',
+      'Trang phục đẹp, size vừa vặn!',
+      'Chất liệu tốt, may mặc chắc chắn.',
+      'Giá hợp lý, sẽ giới thiệu bạn bè.',
+      'Đóng gói cẩn thận, shop nhiệt tình.',
+      'Cosplay xong rất đẹp, mọi người khen nhiều!',
+    ];
+
     // Lấy order items để biết product nào trong order
-    for (const order of commentableOrders.slice(0, 3)) {
-      // Chỉ comment cho order đầu tiên của mỗi user (mỗi order chỉ comment 1 lần)
+    for (const order of commentableOrders) {
       const orderItems = await this.orderItemsRepository.find({
         where: { orderId: order.id },
       });
 
-      if (orderItems.length > 0) {
-        // Comment cho sản phẩm đầu tiên trong order
-        const firstProduct = orderItems[0].productId;
-        const ratings = [5, 4, 5]; // Đánh giá mẫu
-        const contents = [
-          'Sản phẩm rất đẹp, chất lượng tốt!',
-          'Giao hàng nhanh, sản phẩm như mô tả.',
-          'Rất hài lòng với dịch vụ, sẽ quay lại!',
-        ];
-
+      // Comment cho TẤT CẢ products trong order
+      for (const item of orderItems) {
         const comment = this.commentsRepository.create({
           userId: order.userId,
-          productId: firstProduct,
+          productId: item.productId,
           orderId: order.id,
           content: contents[comments.length % contents.length],
           rating: ratings[comments.length % ratings.length],
@@ -678,5 +995,118 @@ export class SeedService {
 
     return comments;
   }
-}
 
+  async debugProducts() {
+    const allProducts = await this.productsRepository.find({
+      relations: ['category', 'productImages'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      total: allProducts.length,
+      active: allProducts.filter(p => p.isActive).length,
+      inactive: allProducts.filter(p => !p.isActive).length,
+      products: allProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        isActive: p.isActive,
+        isAvailable: p.isAvailable,
+        category: p.category?.name || 'N/A',
+        imagesCount: p.productImages?.length || 0,
+        createdAt: p.createdAt,
+      })),
+    };
+  }
+
+  private async seedVouchers(): Promise<Voucher[]> {
+    const now = new Date();
+
+    const vouchers = [
+      {
+        code: 'WELCOME10',
+        description: 'Giảm 10% cho đơn hàng đầu tiên',
+        discountType: VoucherDiscountType.PERCENT,
+        discountValue: 10,
+        maxDiscount: 50000,
+        minOrderValue: 200000,
+        startDate: now,
+        endDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        usageLimit: 100,
+        usedCount: 5,
+        isActive: true,
+      },
+      {
+        code: 'NEWYEAR2025',
+        description: 'Giảm 20% chào mừng năm mới 2025',
+        discountType: VoucherDiscountType.PERCENT,
+        discountValue: 20,
+        maxDiscount: 100000,
+        minOrderValue: 500000,
+        startDate: new Date('2025-01-01'),
+        endDate: new Date('2025-01-31'),
+        usageLimit: 50,
+        usedCount: 12,
+        isActive: true,
+      },
+      {
+        code: 'FREESHIP',
+        description: 'Miễn phí ship 30k',
+        discountType: VoucherDiscountType.FIXED,
+        discountValue: 30000,
+        minOrderValue: 300000,
+        startDate: now,
+        endDate: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000), // 60 days
+        usageLimit: 0, // Unlimited
+        usedCount: 23,
+        isActive: true,
+      },
+      {
+        code: 'COSPLAY50K',
+        description: 'Giảm 50k cho đơn từ 1 triệu',
+        discountType: VoucherDiscountType.FIXED,
+        discountValue: 50000,
+        minOrderValue: 1000000,
+        startDate: now,
+        endDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days
+        usageLimit: 20,
+        usedCount: 8,
+        isActive: true,
+      },
+      {
+        code: 'FLASHSALE',
+        description: 'Flash sale giảm 25%',
+        discountType: VoucherDiscountType.PERCENT,
+        discountValue: 25,
+        maxDiscount: 150000,
+        minOrderValue: 800000,
+        startDate: now,
+        endDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        usageLimit: 30,
+        usedCount: 18,
+        isActive: true,
+      },
+      {
+        code: 'OLDCODE',
+        description: 'Mã cũ đã hết hạn',
+        discountType: VoucherDiscountType.PERCENT,
+        discountValue: 15,
+        maxDiscount: 75000,
+        minOrderValue: 400000,
+        startDate: new Date('2024-12-01'),
+        endDate: new Date('2024-12-31'), // Expired
+        usageLimit: 50,
+        usedCount: 45,
+        isActive: false,
+      },
+    ];
+
+    const createdVouchers = await Promise.all(
+      vouchers.map((voucherData) => {
+        const voucher = this.vouchersRepository.create(voucherData);
+        return this.vouchersRepository.save(voucher);
+      }),
+    );
+
+    return createdVouchers;
+  }
+}
