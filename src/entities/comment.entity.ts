@@ -25,7 +25,10 @@ export class Comment {
   rating: number; // Đánh giá từ 1-5 sao
 
   @Column({ type: 'text', nullable: true })
-  imageUrl: string | null; // URL ảnh đánh giá (optional)
+  imageUrl: string | null; // URL ảnh đánh giá (optional) - deprecated, dùng imageUrls
+
+  @Column({ type: 'simple-array', nullable: true })
+  imageUrls: string[] | null; // URLs nhiều ảnh đánh giá (optional)
 
   @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn({ name: 'userId' })

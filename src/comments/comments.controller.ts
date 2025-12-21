@@ -36,6 +36,22 @@ export class CommentsController {
     return this.commentsService.create(user.id, createCommentDto);
   }
 
+  @Get('user/me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy tất cả bình luận của user hiện tại' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách bình luận thành công' })
+  async findByUser(@CurrentUser() user: any) {
+    return this.commentsService.findByUser(user.id);
+  }
+
+  @Get('order/:orderId')
+  @ApiOperation({ summary: 'Lấy danh sách bình luận theo đơn hàng' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách bình luận thành công' })
+  async findByOrder(@Param('orderId') orderId: string) {
+    return this.commentsService.findByOrder(orderId);
+  }
+
   @Get('product/:productId')
   @ApiOperation({ summary: 'Lấy danh sách bình luận theo sản phẩm với pagination' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Trang (mặc định 1)' })

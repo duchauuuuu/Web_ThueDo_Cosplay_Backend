@@ -30,7 +30,9 @@ export class ProductsService {
     const queryBuilder = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
-      .where('product.isActive = :isActive', { isActive: true });
+      .where('product.isActive = :isActive', { isActive: true })
+      .andWhere('product.quantity > :minQuantity', { minQuantity: 0 })
+      .andWhere('product.isAvailable = :isAvailable', { isAvailable: true });
 
     if (categoryId) {
       queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });

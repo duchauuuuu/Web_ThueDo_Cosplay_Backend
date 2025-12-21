@@ -66,9 +66,18 @@ export class CommentsService {
       );
     }
 
+    // Xử lý imageUrls: ưu tiên imageUrls, fallback về imageUrl (backward compatibility)
+    const imageUrls: string[] | null =
+      createCommentDto.imageUrls && Array.isArray(createCommentDto.imageUrls) && createCommentDto.imageUrls.length > 0
+        ? createCommentDto.imageUrls
+        : createCommentDto.imageUrl && typeof createCommentDto.imageUrl === 'string'
+          ? [createCommentDto.imageUrl]
+          : null;
+
     const comment = this.commentsRepository.create({
       ...createCommentDto,
       userId,
+      imageUrls,
     });
 
     return this.commentsRepository.save(comment);
@@ -103,7 +112,8 @@ export class CommentsService {
       orderId: comment.orderId,
       rating: comment.rating,
       content: comment.content,
-      imageUrl: comment.imageUrl,
+      imageUrl: comment.imageUrl || null, // Backward compatibility
+      imageUrls: comment.imageUrls || null, // Multiple images
       isActive: comment.isActive,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
@@ -115,6 +125,22 @@ export class CommentsService {
       page,
       limit,
     };
+  }
+
+  async findByOrder(orderId: string): Promise<Comment[]> {
+    return this.commentsRepository.find({
+      where: { orderId, isActive: true },
+      relations: ['user', 'product'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findByUser(userId: string): Promise<Comment[]> {
+    return this.commentsRepository.find({
+      where: { userId, isActive: true },
+      relations: ['product', 'order'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findOne(id: string): Promise<Comment> {

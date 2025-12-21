@@ -31,8 +31,16 @@ export class PaymentsController {
     return this.paymentsService.createPayment(createPaymentDto);
   }
 
+  @Post('sepay-webhook')
+  @ApiOperation({ summary: 'Webhook callback từ SePay' })
+  @ApiResponse({ status: 200, description: 'Webhook xử lý thành công' })
+  async sepayWebhook(@Req() req: any) {
+    return this.paymentsService.handleCallback(req.body);
+  }
+
+  // Giữ endpoint cũ để backward compatibility
   @Post('callback')
-  @ApiOperation({ summary: 'Callback từ SePay (Webhook)' })
+  @ApiOperation({ summary: 'Callback từ SePay (Webhook) - Deprecated' })
   @ApiResponse({ status: 200, description: 'Callback thành công' })
   async callback(@Req() req: any) {
     return this.paymentsService.handleCallback(req.body);

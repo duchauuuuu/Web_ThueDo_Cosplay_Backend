@@ -89,6 +89,16 @@ export class OrdersService {
       // Tạo mã đơn hàng
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+      // Xác định status: Nếu là COD (cash) thì tự động confirmed, nếu không thì pending
+      const paymentMethod = createOrderDto.paymentMethod
+        ? String(createOrderDto.paymentMethod).toLowerCase()
+        : '';
+      const isCOD = paymentMethod === 'cod' || paymentMethod === 'cash';
+      const initialStatus = isCOD ? OrderStatus.CONFIRMED : OrderStatus.PENDING;
+
+      // Xác định paymentStatus: COD thì pending (chờ thanh toán khi nhận hàng), bank thì pending (chờ thanh toán online)
+      const paymentStatus = 'pending';
+
       // Tạo đơn hàng
       const order = queryRunner.manager.create(Order, {
         userId,
@@ -99,7 +109,9 @@ export class OrdersService {
         rentalEndDate: new Date(createOrderDto.rentalEndDate),
         rentalAddress: createOrderDto.rentalAddress,
         notes: createOrderDto.notes,
-        status: OrderStatus.PENDING,
+        status: initialStatus,
+        paymentMethod: paymentMethod || undefined,
+        paymentStatus: paymentStatus,
         orderItems,
       });
 
