@@ -19,6 +19,11 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }
