@@ -131,7 +131,7 @@ export class OrdersService {
     const where = userId ? { userId } : {};
     return this.ordersRepository.find({
       where,
-      relations: ['user', 'orderItems', 'orderItems.product'],
+      relations: ['user', 'orderItems', 'orderItems.product', 'orderItems.product.productImages'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -139,7 +139,7 @@ export class OrdersService {
   async findOne(id: string): Promise<Order> {
     const order = await this.ordersRepository.findOne({
       where: { id },
-      relations: ['user', 'orderItems', 'orderItems.product'],
+      relations: ['user', 'orderItems', 'orderItems.product', 'orderItems.product.productImages'],
     });
     if (!order) {
       throw new NotFoundException(`Không tìm thấy đơn hàng với ID: ${id}`);
